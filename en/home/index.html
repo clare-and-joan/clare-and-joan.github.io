@@ -570,6 +570,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseEight" aria-expanded="false" aria-controls="flush-collapseEight">
+                        Is there a dress code?
+                        </button>
+                    </h2>
+                    <div id="flush-collapseEight" class="accordion-collapse collapse" data-bs-parent="#qna-accordion">
+                        <div class="accordion-body">There's no strict dress code — we're keeping things relaxed. Just aim for something 
+                            between casual and elegant. We want to see you rock your best outfit!
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -582,7 +594,7 @@
 
     <!-- Footer -->
     <footer class="text-center p-3 bg-dark text-white">
-        <p>Designed with ❤️</p>
+        <p>Designed with ❤️ by C&J</p>
     </footer>
 
     <!-- RSVP Modal -->
@@ -679,11 +691,6 @@
                 setTimeout(function () { defer(method) }, 50);
             }
         }
-        defer(function () {
-            new FlipDown(1751808600, {
-                theme: "light",
-            }).start();
-        });
 
         // Check cookie
         function getCookieValue(name) {
@@ -703,7 +710,41 @@
     </script>
     <!-- RSVP submission -->
     <script type="module">
-        import { submitRSVP } from 'https://www.love-at-first-swipe.com/love_at_first_swipe.js';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.1.0/+esm';
+
+        const supabaseUrl = 'https://oollfmokpdzupkqwtwtb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vbGxmbW9rcGR6dXBrcXd0d3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjUzNDYsImV4cCI6MjA2MDQwMTM0Nn0.gBh79dtdc9dhYWhHsyq6iIxcfkV5oOYvac6uu7QwwVI'; // Public key
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Function to insert RSVP data
+        const submitRSVP = async (name, weddingAttendance, welcomePartyAttendance, dietaryRequirements, songRecommendation) => {
+            const weddingAttendanceBool = weddingAttendance === 'yes';
+            const welcomePartyAttendanceBool = welcomePartyAttendance === 'yes';
+            
+            const { data, error } = await supabase
+            .from('rsvp')
+            .insert([
+                {
+                name,
+                attendance: weddingAttendanceBool,
+                welcome_party_attendance: welcomePartyAttendanceBool,
+                comment: dietaryRequirements,
+                song: songRecommendation
+                },
+            ]);
+        
+            if (error) {
+            console.error('Error adding RSVP data:', error);
+            alert('There was an error submitting your RSVP. Please try again.');
+
+            return false;
+            } else {
+            console.log('RSVP submitted successfully:', data);
+            alert('Your RSVP has been submitted. Thank you!');
+
+            return true;
+            }
+        };
 
         const rsvpModal = new bootstrap.Modal(document.getElementById('rsvpModal'));
       
@@ -712,21 +753,19 @@
         
             // Get form values
             const name = document.getElementById('name').value.trim();
-            const surname = document.getElementById('surname').value.trim();
             const weddingAttendance = document.getElementById('weddingAttendance').value;
-            const secondDayAttendance = document.getElementById('secondDayAttendance').value;
+            const welcomePartyAttendance = document.getElementById('welcomePartyAttendance').value;
             const dietaryRequirements = document.getElementById('dietaryRequirements').value.trim();
-            const plusOneAttendance = document.getElementById('plusOne').value;
-            const plusOneName = document.getElementById('plusOneName').value.trim();
+            const songRecommendation = document.getElementById('song').value.trim();
 
             // Validate required fields
-            if (!name || !surname || !weddingAttendance || !secondDayAttendance) {
+            if (!name || !weddingAttendance || !welcomePartyAttendance) {
                 alert('Please fill out all required fields.');
                 return;
             }
 
             // Call submitRSVP with form values
-            const sendForm = await submitRSVP(name, surname, weddingAttendance, secondDayAttendance, dietaryRequirements, plusOneAttendance, plusOneName);
+            const sendForm = await submitRSVP(name, weddingAttendance, welcomePartyAttendance, dietaryRequirements, songRecommendation);
         
             // Reset form
             event.target.reset();
